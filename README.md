@@ -1,12 +1,11 @@
 # Arch Linux Discord RPC
 
 Shows "using arch btw" in your Discord status. 
-Supports automatic startup for **Hyprland** and standard XDG environments (GNOME, KDE, etc).
+Supports automatic startup for **Hyprland**.
 
 ## Shortcut
 
 - Hyprland: The installer automatically adds a binding to your `hyprland.conf` (Default: `$mainMod + Shift + P`).
-- Other Environments: You can manually set a shortcut to run the command: `pkill -USR1 arch-rpc`.
 
 ## Installation
 
