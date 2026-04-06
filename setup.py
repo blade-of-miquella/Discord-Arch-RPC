@@ -1,10 +1,20 @@
 import os
+import shutil
+import logging
 import subprocess
+import textwrap
 
 exe_path = os.path.expanduser("~/.local/bin/arch-rpc")
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+)
+logger = logging.getLogger(__name__)
+
 def setup_systemd():
-    service_content = f"""[Unit]
+    service_content = textwrap.dedent(f"""\
+        [Unit]
         Description=Discord Arch RPC
         After=network.target
 
@@ -17,32 +27,40 @@ def setup_systemd():
 
         [Install]
         WantedBy=default.target
-        """
-    
+        """)
+
     systemd_dir = os.path.expanduser("~/.config/systemd/user")
     os.makedirs(systemd_dir, exist_ok=True)
-    
+
     service_path = os.path.join(systemd_dir, "arch-rpc.service")
     with open(service_path, "w") as f:
         f.write(service_content)
-        
-    subprocess.run(["systemctl", "--user", "daemon-reload"])
-    subprocess.run(["systemctl", "--user", "enable", "--now", "arch-rpc.service"])
+
+    subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
+    subprocess.run(["systemctl", "--user", "enable", "--now", "arch-rpc.service"], check=True)
+    logger.info("systemd service enabled and started.")
 
 def setup_hyprland_bind():
     is_hyprland = os.environ.get('HYPRLAND_INSTANCE_SIGNATURE') is not None
     if not is_hyprland:
         return
-        
+
     config_path = os.path.expanduser("~/.config/hypr/hyprland.conf")
-    if os.path.exists(config_path):
-        with open(config_path, 'r') as f:
-            content = f.read()
-        
-        if "pkill -USR1 arch-rpc" not in content:
-            with open(config_path, 'a') as f:
-                f.write("\n# Arch-RPC Pause Bind\n")
-                f.write("bind = $mainMod SHIFT, P, exec, pkill -USR1 arch-rpc\n")
+    if not os.path.exists(config_path):
+        return
+
+    with open(config_path, 'r') as f:
+        content = f.read()
+
+    if "pkill -USR1 arch-rpc" not in content:
+        backup_path = config_path + ".bak"
+        shutil.copy2(config_path, backup_path)
+        logger.info("Backed up hyprland.conf to %s", backup_path)
+
+        with open(config_path, 'a') as f:
+            f.write("\n# Arch-RPC Pause Bind\n")
+            f.write("bind = $mainMod SHIFT, P, exec, pkill -USR1 arch-rpc\n")
+        logger.info("Added Hyprland key binding.")
 
 if __name__ == "__main__":
     setup_systemd()
