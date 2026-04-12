@@ -1,4 +1,5 @@
 import os
+import shutil
 import logging
 import subprocess
 import textwrap
@@ -55,7 +56,6 @@ def setup_hyprland_bind():
 
     bind_cmd = "systemctl --user kill -s USR1 arch-rpc.service"
     if bind_cmd not in content:
-        import shutil
         backup_path = config_path + ".bak"
         shutil.copy2(config_path, backup_path)
         logger.info("Backed up hyprland.conf to %s", backup_path)
