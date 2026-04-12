@@ -1,10 +1,11 @@
 import os
-import shutil
 import logging
 import subprocess
 import textwrap
 
-exe_path = os.path.expanduser("~/.local/bin/arch-rpc")
+INSTALL_DIR = os.path.expanduser("~/.local/share/arch-rpc")
+venv_python = os.path.join(INSTALL_DIR, "venv", "bin", "python")
+script_path = os.path.join(INSTALL_DIR, "main.py")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,7 +21,7 @@ def setup_systemd():
 
         [Service]
         Type=simple
-        ExecStart={exe_path}
+        ExecStart={venv_python} {script_path}
         Restart=always
         RestartSec=10
         Environment=PYTHONUNBUFFERED=1
@@ -52,14 +53,16 @@ def setup_hyprland_bind():
     with open(config_path, 'r') as f:
         content = f.read()
 
-    if "pkill -USR1 arch-rpc" not in content:
+    bind_cmd = "systemctl --user kill -s USR1 arch-rpc.service"
+    if bind_cmd not in content:
+        import shutil
         backup_path = config_path + ".bak"
         shutil.copy2(config_path, backup_path)
         logger.info("Backed up hyprland.conf to %s", backup_path)
 
         with open(config_path, 'a') as f:
             f.write("\n# Arch-RPC Pause Bind\n")
-            f.write("bind = $mainMod SHIFT, P, exec, pkill -USR1 arch-rpc\n")
+            f.write(f"bind = $mainMod SHIFT, P, exec, {bind_cmd}\n")
         logger.info("Added Hyprland key binding.")
 
 if __name__ == "__main__":
