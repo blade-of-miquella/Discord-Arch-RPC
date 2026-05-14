@@ -47,7 +47,7 @@ def setup_hyprland_bind():
     if not is_hyprland:
         return
 
-    config_path = os.path.expanduser("~/.config/hypr/hyprland.conf")
+    config_path = os.path.expanduser("~/.config/hypr/hyprland.lua")
     if not os.path.exists(config_path):
         return
 
@@ -61,8 +61,7 @@ def setup_hyprland_bind():
         logger.info("Backed up hyprland.conf to %s", backup_path)
 
         with open(config_path, 'a') as f:
-            f.write("\n# Arch-RPC Pause Bind\n")
-            f.write(f"bind = $mainMod SHIFT, P, exec, {bind_cmd}\n")
+            f.write(f'hl.bind("SUPER" .. " + SHIFT + P", hl.dsp.exec_cmd("{bind_cmd}"))')
         logger.info("Added Hyprland key binding.")
 
 if __name__ == "__main__":
