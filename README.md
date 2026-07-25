@@ -7,7 +7,7 @@ Supports automatic startup via **systemd** with optional **Hyprland** key bindin
 
 ## Shortcut
 
-- **Hyprland:** The installer automatically adds a key binding to your `hyprland.conf` (Default: `$mainMod + Shift + P`) to toggle pause.
+- **Hyprland:** The installer automatically adds a key binding to your `hyprland.lua` (Default: `$mainMod + Shift + P`) to toggle pause.
 - **Other WMs / manual control:**
   ```bash
   # Pause / resume
